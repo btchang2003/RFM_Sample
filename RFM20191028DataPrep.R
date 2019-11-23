@@ -38,3 +38,4 @@ RFM <- Sales.rpt %>%
 
 RFM <- RFM[,c(1,5,3,4)]
 
+write.csv(RFM,'RFM_Report.csv')
