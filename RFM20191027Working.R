@@ -84,7 +84,7 @@ dt.nz <- dist(nz, method = "euclidean") ## Calculate Euclidean Distance
 
 plot(silhouette(Group,dt.nz),border=NA,col=1:ck)
 ## to make Better color with palette
-## by replacint  the above line with the following 3 lines
+## by replacing  the above line with the following 3 lines
 
 # library(colorspace) # get nice colors
 # Nice.color <- rainbow_hcl(ck)[1:ck]
