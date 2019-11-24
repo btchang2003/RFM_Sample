@@ -1,81 +1,102 @@
+# A sample of RFM Analysis by Kmeans with R 
+# Step 0 - Data and Environment Preparation
 
-
+## Check the current directory
 getwd()
+
+## Set the working directory to the current one
 setwd("D:/Ben/Ben/OneDrive/BI/Projects/R Insert")
 
-# Skip the following installation for already existed packages
+## Preinstall packages
 
-install.packages("cluster")
-install.packages("colorspace")
+install.packages("dplyr") ## for Data manipulate in Step 1
+## "dplyr" is a member of  "tidyverse" package set
 
-# Import final RFM file
+install.packages("ggplot2") ## for visualization in Step 3 and 4
+## all needed packages "colorspace","cluster","GGALLY" are included
 
-RFM <- read.csv("RFM_Report.csv",header=TRUE,
-                fileEncoding = "UTF-8-BOM")
+## Read then check the raw data
+Sales.rpt <- read.csv("SalesReport.csv",header=TRUE,fileEncoding = "UTF-8-BOM")
+head(Sales.rpt,5)
 
-# Nomralize numeric columns
+## Change the column names
+names(Sales.rpt)[1] <- "Date"
+names(Sales.rpt)[3] <- "Amount"
 
+## Check the result
+head(Sales.rpt,5)
+
+## Check the Data tpye
+sapply(Sales.rpt, typeof) ## the type of data in storage
+sapply(Sales.rpt, class) ## the category of data in the Dataframe
+
+## Modify the data class of the column "Date"
+Sales.rpt$Date <- as.Date(Sales.rpt$Date,format = "%Y/%m/%d")
+
+## Recheck the data type
+sapply(Sales.rpt, class)
+
+# Step 1 - Create the Query "RFM"
+
+## Active package "dplyr"
+library(dplyr)
+
+## Group raw data by ID
+RFM <- Sales.rpt %>%
+  group_by(ID) %>%
+  summarize(
+    Date.latest=max(Date),
+    F=length(Amount),
+    M=sum(Amount)
+  ) %>%
+  mutate(R=as.integer(max(Date.latest)-Date.latest))
+
+## Rearrange the content
+RFM <- RFM[,c(1,5,3,4)]
+
+# Step 2 - Create the Visual 1 "Elbow Chart"
+
+## Normalization before clustering
 rfm <- RFM[,c(2,3,4)]
 nz<-scale(rfm,center=TRUE,scale=TRUE)
 
-# Scree Chart
+## Create Elbow Chart
 set.seed(42)
-wss <- sum(kmeans(nz,1)$withinss)
-# wss <- kmeans(nz.1)$tot.withinss
-for (i in 2:10){
-  wss[i] <- sum(kmeans(nz,centers=i)$withinss)
+wss <- vector()
+for (i in 1:10){
+  wss[i] <- kmeans(nz,centers=i)$tot.withinss
 } 
 
 plot(1:10,wss,type="b",
      xlab="Number of Clusters",ylab="Within Group SS",
      main="Scree Chart",pch=19)  
 
-# Execute Kmeans
+# Step 3 - Evaluation by Silhouette in Visual 2
 
 ck=3
 km <- kmeans(nz,ck)
 Group <- km$cluster
 
-# Silhouette Examination
+## Silhouette Examination
 
 library(cluster) # plot silhouette chart
+dt.nz <- dist(nz, method = "euclidean") ## Calculate Euclidean Distance
 
-dt.nz <- dist(nz, method = "euclidean")
 plot(silhouette(Group,dt.nz),border=NA,col=1:ck)
-
-## Improve appearance
+## to make Better color with palette
+## by replacint  the above line with the following 3 lines
 
 library(colorspace) # get nice colors
-
 Nice.color <- rainbow_hcl(ck)[1:ck]
 plot(silhouette(Group,dt.nz),border=NA,col=Nice.color)
 
-# Merge the grouped list to the original table
+# Step 4 - Make busines decission by Visual 3
 
+## Create the result file
 RFM.res <- cbind(RFM,Group)
 
-# Connect to Business Decision
-
-Pair.data <- RFM.res[,c(2,3,4)]
-Group.color <- rainbow_hcl(3)[as.numeric(RFM.res$Group)]
-
-# dev.set(1)
-
-pairs(Pair.data, col = Group.color,
-      lower.panel = NULL,
-      cex.labels=2, pch=19, cex = 0.8)
-
-par(xpd = NA)
-legend(x = 0.05, y = 0.6, cex = 1,
-       legend = as.character(levels(factor(RFM.res$Group))),
-       fill = unique(Group.color))
-
-# try ggplot2
-install.packages("ggplot2")
 library(ggplot2)
-#data(mtcars)
 library(GGally)
-ggpairs(RFM.res[,2:4], aes(colour = Group.color, alpha = 0.4))
 
-ggpairs(RFM.res[,2:4], aes(colour = as.character(RFM.res$Group), alpha = 0.4))
-
+ggpairs(RFM.res[,2:4], aes(colour = as.character(RFM.res$Group),alpha = 0.4))
+# End of the Snippet

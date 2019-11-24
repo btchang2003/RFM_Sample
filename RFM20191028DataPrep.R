@@ -1,7 +1,7 @@
 
 
 getwd()
-setwd("D:/Ben/Ben/OneDrive/BI/Projects/R Insert")
+# setwd("D:/Ben/Ben/OneDrive/BI/Projects/R Insert")
 
 install.packages("dplyr")
 # install.packages("tidyverse")
@@ -38,4 +38,4 @@ RFM <- Sales.rpt %>%
 
 RFM <- RFM[,c(1,5,3,4)]
 
-write.csv(RFM,'RFM_Report.csv')
+write.csv(RFM,'RFM_Report.csv',row.names=FALSE)
