@@ -86,9 +86,9 @@ plot(silhouette(Group,dt.nz),border=NA,col=1:ck)
 ## to make Better color with palette
 ## by replacint  the above line with the following 3 lines
 
-library(colorspace) # get nice colors
-Nice.color <- rainbow_hcl(ck)[1:ck]
-plot(silhouette(Group,dt.nz),border=NA,col=Nice.color)
+# library(colorspace) # get nice colors
+# Nice.color <- rainbow_hcl(ck)[1:ck]
+# plot(silhouette(Group,dt.nz),border=NA,col=Nice.color)
 
 # Step 4 - Make busines decission by Visual 3
 
